@@ -1,0 +1,68 @@
+# Copy to terraform.tfvars and adjust non-secret values as needed.
+# Do NOT put sql_admin_password, db_app_password, or apim_publisher_email
+# here - export the passwords instead (see README.md):
+#   export TF_VAR_sql_admin_password='...'
+#   export TF_VAR_db_app_password='...'
+# apim_publisher_email has no default on purpose (not secret, just not
+# something to commit even as a placeholder) - set it directly in your own
+# terraform.tfvars, which stays untracked.
+#
+# Naming uses a "-afd" qualifier throughout, distinct from the manual
+# environment (rg-itemcatalog-dev), the plain-ACA Terraform environment
+# (rg-itemcatalog-dev-iac), and the APIM-fronted Terraform environment
+# (rg-itemcatalog-dev-gw) - globally-unique-named resources here (SQL
+# server, Key Vault, ACR, APIM, Front Door, WAF policy) would otherwise
+# collide with any of the three.
+
+location    = "West US 2"
+environment = "dev-afd"
+
+resource_group_name = "rg-itemcatalog-dev-afd"
+
+sql_server_name   = "sql-itemcatalog-dev-afd-westus2"
+sql_database_name = "ItemCatalogDb"
+sql_admin_login   = "agia"
+db_app_user       = "itemcatalog_app"
+
+sql_min_capacity     = 0.5
+sql_max_capacity     = 2
+sql_auto_pause_delay = 60
+sql_max_size_gb      = 32
+
+# Required for mssql_user (21-sql-user.tf) to connect and create the app's
+# SQL login. Find yours with: curl -s https://api.ipify.org
+developer_public_ip = "YOUR_PUBLIC_IP"
+
+key_vault_name = "kv-itemcatalog-dev-afd"
+acr_name       = "acritemcatalogdevafd"
+
+log_analytics_workspace_name   = "law-itemcatalog-dev-afd"
+container_app_environment_name = "cae-itemcatalog-dev-afd"
+container_app_name             = "ca-itemcatalog-api-dev-afd"
+container_image_repository     = "item-catalog-service"
+container_image_tag            = "1.0.0"
+container_cpu                  = 0.5
+container_memory               = "1Gi"
+container_min_replicas         = 0
+container_max_replicas         = 2
+
+static_web_app_name = "swa-itemcatalog-ui-dev-afd"
+static_web_app_sku  = "Standard"
+
+apim_name           = "apim-itemcatalog-dev-afd"
+apim_publisher_name = "item-catalog"
+api_name             = "item-catalog-api"
+api_display_name     = "Item Catalog API"
+api_path              = "api/v1"
+
+aca_auth_app_registration_name = "ca-itemcatalog-api-auth-dev-afd"
+
+afd_sku_name              = "Premium_AzureFrontDoor"
+afd_profile_name          = "afd-itemcatalog-dev-afd"
+afd_endpoint_name         = "itemcatalog-dev-afd"
+afd_origin_group_name     = "itemcatalog-dev-afd-origin-group"
+afd_origin_name           = "swa-itemcatalog-ui-origin"
+afd_route_name            = "itemcatalog-dev-afd-route"
+afd_waf_policy_name       = "wafitemcatalogdevafd"
+afd_security_policy_name  = "itemcatalog-dev-afd-security-policy"
+afd_waf_mode              = "Prevention"
